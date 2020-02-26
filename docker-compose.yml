@@ -1,0 +1,136 @@
+version: "2"
+services:
+  tools:
+    container_name: invoice-commands-handler-stream-tools
+    image: gitlab.pipefy.net:8443/pipefy/docker-images/kafka-cp:latest
+    entrypoint: /bin/bash -c "tail -f /dev/null"
+    networks:
+      - invoice-commands-handler-stream
+    volumes:
+      - ./bin:/opt/confluent-5.3.1/bin/pipefy/
+
+#  app:
+#    container_name: invoice-commands-handler-stream-app
+#    image: mozilla/sbt
+#    environment:
+#      - JAVA_OPTIONS=-Xmx300m
+#    command: /bin/sh -c "tail -f /dev/null"
+#    volumes:
+#      - .:/app
+#    networks:
+#      - invoice-commands-handler-stream
+#    depends_on:
+#      - zookeeper
+#      - broker
+#      - kafka-schema-registry
+#
+#  tests:
+#    container_name: invoice-commands-handler-stream-tests
+#    image: mozilla/sbt
+#    environment:
+#      - JAVA_OPTIONS=-Xmx300m
+#      - PFY_PIPE_COMMANDS_HANDLER_STREAM_APP_ENV=test
+#    command: /bin/sh -c "tail -f /dev/null"
+#    volumes:
+#      - .:/app
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.3.0
+    networks:
+      - invoice-commands-handler-stream
+    hostname: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  broker:
+    image: confluentinc/cp-enterprise-kafka:5.2.1
+    networks:
+      - invoice-commands-handler-stream
+    hostname: broker
+    depends_on:
+      - zookeeper
+    ports:
+      - "29092:29092"
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_ADVERTISED_HOST_NAME: "broker"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker:29092
+      CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: zookeeper:2181
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      CONFLUENT_METRICS_ENABLE: "true"
+      CONFLUENT_SUPPORT_CUSTOMER_ID: "anonymous"
+
+  kafka-schema-registry:
+    image: confluentinc/cp-schema-registry:5.3.0
+    networks:
+      - invoice-commands-handler-stream
+    hostname: kafka-schema-registry
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://broker:29092
+      SCHEMA_REGISTRY_HOST_NAME: kafka-schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+    depends_on:
+      - zookeeper
+      - broker
+
+  # kafka-schema-registry-ui:
+  #   image: landoop/schema-registry-ui:0.9.4
+  #   networks:
+  #     - invoice-commands-handler-stream
+  #   hostname: kafka-kafka-schema-registry-ui
+  #   ports:
+  #     - "8001:8000"
+  #   environment:
+  #     SCHEMAREGISTRY_URL: http://kafka-schema-registry:8081/
+  #     PROXY: "true"
+  #   depends_on:
+  #     - kafka-schema-registry
+
+  # kafka-rest-proxy:
+  #   image: confluentinc/cp-kafka-rest:5.3.1
+  #   networks:
+  #     - invoice-commands-handler-stream
+  #   hostname: kafka-rest-proxy
+  #   ports:
+  #     - "8082:8082"
+  #   environment:
+  #     # KAFKA_REST_ZOOKEEPER_CONNECT: zoo1:2181
+  #     KAFKA_REST_LISTENERS: http://0.0.0.0:8082/
+  #     KAFKA_REST_SCHEMA_REGISTRY_URL: http://kafka-schema-registry:8081/
+  #     KAFKA_REST_HOST_NAME: kafka-rest-proxy
+  #     KAFKA_REST_BOOTSTRAP_SERVERS: PLAINTEXT://broker:29092
+  #   depends_on:
+  #     - zookeeper
+  #     - broker
+  #     - kafka-schema-registry
+
+  # kafka-topics-ui:
+  #   image: landoop/kafka-topics-ui:0.9.4
+  #   networks:
+  #     - invoice-commands-handler-stream
+  #   hostname: kafka-topics-ui
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     KAFKA_REST_PROXY_URL: "http://kafka-rest-proxy:8082/"
+  #     PROXY: "true"
+  #   depends_on:
+  #     - zookeeper
+  #     - broker
+  #     - kafka-schema-registry
+  #     - kafka-rest-proxy
+
+networks:
+  invoice-commands-handler-stream:
