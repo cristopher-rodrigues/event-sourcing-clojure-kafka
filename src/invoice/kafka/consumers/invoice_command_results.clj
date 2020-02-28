@@ -7,15 +7,16 @@
 
 (def dess (des/->avro-deserializer (:kafka.serde/config kafka/config)))
 
-(def topic "invoice-commands")
+(def topic "invoice-command-results")
 
+; TODO: Move to a base consumer
 (defn- build-consumer
   "Create the consumer instance to consume
 from the provided kafka topic name"
   []
   (let [consumer-props                                      ; use kafka/config and merge deserializers
         {"bootstrap.servers", "localhost:9092"
-         "group.id",          "My-Group3"
+         "group.id",          "My-Group32222"
          "key.deserializer",  StringDeserializer
          "value.deserializer", ByteArrayDeserializer
          "auto.offset.reset", "earliest"
@@ -25,11 +26,14 @@ from the provided kafka topic name"
 
 (def consumer (build-consumer))
 
-(defn wait-for [command-uuid]
-  (while true
-    (let [records (.poll consumer 100)]
-      (doseq [record records]
-        (println "Sending on value"
-                 (str "Value: " (.value record)))
-        (println (.deserialize dess topic (.value record)))))
-    (.commitAsync consumer)))
+; TODO: compare origin_id also
+(defn wait-for [command-id]
+  (def result (atom nil))
+  (while (nil? @result)
+    (do
+      (let [records (.poll consumer 100)]
+        (doseq [record records]
+          (let [msg (.deserialize dess topic (.value record))] ; only deserialize the command-id message verify the key
+            (if (= command-id (:command-id msg)) (reset! result msg))))))
+    (.commitAsync consumer))
+  @result)

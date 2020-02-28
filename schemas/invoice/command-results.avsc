@@ -1,0 +1,105 @@
+{
+	"type": "record",
+	"name": "CommandResult",
+	"fields": [{
+		"name": "origin_id",
+		"type": "string"
+	}, {
+		"name": "command_id",
+		"type": "string"
+	}, {
+		"name": "outcome",
+		"type": [{
+			"type": "record",
+			"name": "Success",
+			"fields": [{
+				"name": "events",
+				"type": {
+					"type": "array",
+					"items": {
+						"type": "record",
+						"name": "Event",
+						"fields": [{
+							"name": "version",
+							"type": "int"
+						}, {
+							"name": "command_id",
+							"type": "string"
+						}, {
+							"name": "payload",
+							"type": [{
+                                "type": "record",
+                                "name": "InvoiceCreated",
+                                "fields": [{
+                                    "name": "timestamp",
+                                    "type": {
+                                        "type": "long",
+                                        "logicalType": "timestamp-millis"
+                                    }
+                                }, {
+                                    "name": "customer",
+                                    "type": "string"
+                                }]
+                            }]
+						}]
+					}
+				}
+			},
+			{
+                "name": "old_snapshot",
+                "type": {
+                    "type": "record",
+                    "name": "Snapshot",
+                    "fields": [{
+                        "name": "invoice",
+                        "type": {
+                            "type": "record",
+                            "name": "Invoice",
+                            "fields": [{
+                                "name": "customer",
+                                "type": ["null", "string"]
+                            }, {
+                                "name": "uuid",
+                                "type": ["null", "string"]
+                            }]
+                        }
+                    }]
+                }
+            }, {
+                "name": "new_snapshot",
+                "type": "Snapshot"
+            }]
+		}, {
+			"type": "record",
+			"name": "Failure",
+			"fields": [{
+				"name": "cause",
+				"type": [{
+					"type": "record",
+					"name": "NameTaken",
+					"fields": [{
+						"name": "name",
+						"type": "string"
+					}]
+				}, {
+					"type": "record",
+					"name": "NotFound",
+					"fields": [{
+						"name": "uuid",
+						"type": "string"
+					}]
+				}, {
+					"type": "record",
+					"name": "VersionMismatch",
+					"fields": [{
+						"name": "actual",
+						"type": "int"
+					}, {
+						"name": "expected",
+						"type": ["null", "int"]
+					}]
+				}]
+			}]
+		}]
+	}]
+}

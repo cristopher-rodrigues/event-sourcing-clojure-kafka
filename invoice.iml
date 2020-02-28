@@ -101,7 +101,7 @@
     <orderEntry type="library" name="Leiningen: org.xerial.snappy/snappy-java:1.1.7.3" level="project" />
     <orderEntry type="library" name="Leiningen: org.yaml/snakeyaml:1.23" level="project" />
     <orderEntry type="library" name="Leiningen: ovotech/abracad:0.4.15" level="project" />
-    <orderEntry type="library" name="Leiningen: ovotech/kafka-avro-confluent:2.1.0-1" level="project" />
+    <orderEntry type="library" name="Leiningen: ovotech/kafka-avro-confluent:2.1.0-2" level="project" />
     <orderEntry type="library" name="Leiningen: ovotech/kafka-clj-utils:2.1.0-3" level="project" />
     <orderEntry type="library" name="Leiningen: potemkin:0.4.5" level="project" />
     <orderEntry type="library" name="Leiningen: prismatic/plumbing:0.5.5" level="project" />

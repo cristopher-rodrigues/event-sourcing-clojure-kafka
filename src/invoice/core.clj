@@ -1,5 +1,5 @@
 (ns invoice.core
-  (:require [ring.util.http-response :refer [ok]]
+  (:require [ring.util.http-response :refer [ok conflict]]
             [schema.core :as sc]
             [compojure.api.sweet :refer [api routes GET POST ANY]]
             [ring.adapter.jetty :refer [run-jetty]]
@@ -11,10 +11,12 @@
              {:customer sc/Str
                 :items [sc/Str]})
 
+; TODO: Add items
 (defn create-invoice-handler [create-invoice-req]
-  (invoice-commands-producer/produce nil {:customer (:customer create-invoice-req)}) ; return command-uuid
-  (invoice-command-results/wait-for "1234")
-  (ok create-invoice-req))
+  (let [command-id (invoice-commands-producer/produce nil {:customer (:customer create-invoice-req)})]
+      (let [result (invoice-command-results/wait-for command-id)]
+            (let [snapshot (:new-snapshot (:outcome result))]
+              (if (nil? snapshot) (conflict (:cause (:outcome result))) (ok snapshot))))))
 
 (def invoice-routes
   [(POST "/invoices" []

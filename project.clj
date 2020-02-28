@@ -12,7 +12,7 @@
 
                  ; Kafka
                  [ovotech/kafka-clj-utils "2.1.0-3"]
-                 [ovotech/kafka-avro-confluent "2.1.0-1"]
+                 [ovotech/kafka-avro-confluent "2.1.0-2"]
                  [org.apache.kafka/kafka-clients "2.3.1"]]
                  :repl-options {:init-ns invoice.core}
   :main invoice.core)

@@ -5,10 +5,10 @@
 (def avro-schema {:type "record"
     :name "InvoiceCommands"
     :fields [{
-    :name  "origin_uuid",
+    :name  "origin_id",
     :type "string"
     }, {
-        :name "command_uuid",
+        :name "command_id",
         :type "string"
         }, {
             :name  "expected_version",
@@ -28,12 +28,14 @@
 
 ; TODO How to send the key?
 (defn produce [expected-version, command-payload]
-  (let [bundle     {:avro-schema avro-schema
+  (let [command-id (.toString (java.util.UUID/randomUUID))
+        bundle     {:avro-schema avro-schema
                     :topic-name  "invoice-commands"
                     :records     [{
-                                   :origin_uuid "origin-uuid",
-                                   :command_uuid "command-uuid",
+                                   :origin_id "origin-uuid",
+                                   :command_id command-id,
                                    :expected_version expected-version,
                                    :payload command-payload
                                    }]}]
-    (producer/produce bundle)))
+    (producer/produce bundle)
+    command-id))

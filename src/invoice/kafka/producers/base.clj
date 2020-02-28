@@ -5,5 +5,4 @@
 (def producer (kp/->producer kafka/config))
 
 (defn produce [bundle]
-  (println bundle)
   (kp/publish-avro-bundle producer bundle))
