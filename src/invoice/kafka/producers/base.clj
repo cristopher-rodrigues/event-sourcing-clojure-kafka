@@ -1,10 +1,9 @@
 (ns invoice.kafka.producers.base
-  (:require [kafka-clj-utils.producers :as kp]))
+  (:require [kafka-clj-utils.producers :as kp]
+            [invoice.kafka.kafka :as kafka]))
 
-(def config {:kafka.serde/config {:schema-registry/base-url "http://localhost:8081"}
-             :kafka/config       {:bootstrap.servers "localhost:9092"}})
-
-(def producer (kp/->producer config))
+(def producer (kp/->producer kafka/config))
 
 (defn produce [bundle]
+  (println bundle)
   (kp/publish-avro-bundle producer bundle))

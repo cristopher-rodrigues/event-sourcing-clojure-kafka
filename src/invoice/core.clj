@@ -3,6 +3,7 @@
             [schema.core :as sc]
             [compojure.api.sweet :refer [api routes GET POST ANY]]
             [ring.adapter.jetty :refer [run-jetty]]
+            [invoice.kafka.consumers.invoice-command-results :as invoice-command-results]
             [invoice.kafka.producers.invoice-commands :as invoice-commands-producer]))
 
 ; domain / api
@@ -11,7 +12,8 @@
                 :items [sc/Str]})
 
 (defn create-invoice-handler [create-invoice-req]
-  (invoice-commands-producer/produce nil {:customer (:customer create-invoice-req)})
+  (invoice-commands-producer/produce nil {:customer (:customer create-invoice-req)}) ; return command-uuid
+  (invoice-command-results/wait-for "1234")
   (ok create-invoice-req))
 
 (def invoice-routes

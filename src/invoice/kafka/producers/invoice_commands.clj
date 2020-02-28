@@ -1,6 +1,5 @@
 (ns invoice.kafka.producers.invoice-commands
-  (:require [kafka-clj-utils.producers :as kp]
-            [invoice.kafka.producers.base :as producer]))
+  (:require [invoice.kafka.producers.base :as producer]))
 
 ; TODO Add items on the command payload
 (def avro-schema {:type "record"
@@ -27,6 +26,7 @@
                 }]
     })
 
+; TODO How to send the key?
 (defn produce [expected-version, command-payload]
   (let [bundle     {:avro-schema avro-schema
                     :topic-name  "invoice-commands"
